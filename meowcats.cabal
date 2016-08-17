@@ -15,4 +15,7 @@ executable           meowcats
     ghc-options:     -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
     extensions:      OverloadedStrings
     build-depends:   base >= 4.7 && < 5
+                   , text
+                   , directory
+                   , QuickCheck
                    , scotty
