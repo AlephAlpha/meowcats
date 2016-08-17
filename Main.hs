@@ -1,8 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import qualified Data.Text.Lazy      as T
+import           Control.Monad
+import qualified Data.Text.Lazy                as T
 import           System.Directory
 import           Test.QuickCheck.Gen
+import           Text.Blaze.Html.Renderer.Text
+import           Views.AllCatsLinks
+import           Views.AllCatsView
+import           Views.Meow
 import           Web.Scotty
 
 type Cat = String
@@ -27,7 +32,7 @@ catExists :: Cat -> IO Bool
 catExists cat = doesFileExist =<< catPath cat
 
 getAllCats :: IO [Cat]
-getAllCats = getDirectoryContents =<< catDir
+getAllCats = drop 2 <$> (getDirectoryContents =<< catDir)
 
 getRandomCat :: IO Cat
 getRandomCat = generate . elements =<< getAllCats
@@ -44,10 +49,17 @@ meowCats :: ScottyM ()
 meowCats = do
   get "/meow" $ do
     catSrc <- catUrl <$> liftAndCatchIO getRandomCat
-    html $ T.concat ["<html><body><img src=\"", catSrc, "\" /></body></html>"]
-  get "/all/count" $ do
-    catCount <- T.pack . show . length <$> liftAndCatchIO getAllCats
-    text $ T.concat ["There are ", catCount, " total cat gifs."]
+    html $ renderHtml $ meow catSrc
+  get "/all/:allParam" $ do
+    allCats <- map (ap (,) catUrl) <$> liftAndCatchIO getAllCats
+    allParam <- param "allParam"
+    case (allParam :: T.Text) of
+      "show" -> html $ renderHtml $ allCatsView allCats
+      "count" -> do
+        let catCount = T.pack . show $ length allCats
+        text $ T.concat ["There are ", catCount, " total cat gifs."]
+      _ -> html $ renderHtml $ allCatsLinks allCats
+  get "/all" $ redirect "/all/"
   get "/cats/:cat" $ do
     cat <- param "cat"
     catFound <- liftAndCatchIO $ catExists cat

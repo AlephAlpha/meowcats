@@ -19,3 +19,4 @@ executable           meowcats
                    , directory
                    , QuickCheck
                    , scotty
+                   , blaze-html
