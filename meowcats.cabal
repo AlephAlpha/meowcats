@@ -2,7 +2,7 @@ name:                meowcats
 version:             0.0.0
 synopsis:            a moarcats clone
 homepage:            https://github.com/AlephAlpha/meowcats
-license:             MIT
+license:             Kitty License
 author:              AlephAlpha
 maintainer:          alephalpha911@gmail.com
 category:            Web
